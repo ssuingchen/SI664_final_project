@@ -6,7 +6,7 @@
 <!--    <div class="navbar-header">-->
 <!--        <a class="navbar-brand" href="/">{{ settings.APP_NAME }}</a>-->
 <!--    </div>-->
-    <!-- https://stackoverflow.com/questions/22047251/django-dynamically-get-view-url-and-check-if-its-the-current-page -->
+<!--     https://stackoverflow.com/questions/22047251/django-dynamically-get-view-url-and-check-if-its-the-current-page-->
 <!--    <ul class="navbar-nav mr-auto">-->
 <!--      {% url 'recipes' as recipes %}-->
 <!--      <li {% if request.get_full_path == recipes %}class="active"{% endif %}>-->
@@ -51,17 +51,17 @@
   <div>
     <ul class="navbar-nav mr-auto navbar-right" style="display:flex; float:right;">
         <li class="nav-item dropdown">
+            {% if user.is_authenticated %}
             <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle">
-                <img style="width: 25px;" src="{{ user|gravatar:80 }}"/><b class="caret"></b>
+                <img style="width: 25px;" src="{{ user|gravatar:80 }}"/>
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown" >
-                {% if user.is_authenticated %}
                 <a href="{% url 'logout' %}?next={% url 'recipes:all' %}">Logout</a>
-                {% else %}
-                <a href="{% url 'login' %}?next={% url 'recipes:all' %}">Login</a>
-                {% endif %}
                 <a href="{% url 'recipes:user_page' %}">{{ user.username }}'s page</a>
             </div>
+            {% else %}
+            <a href="{% url 'login' %}?next={% url 'recipes:all' %}">Login</a>
+            {% endif %}
         </li>
     </ul>
   </div>

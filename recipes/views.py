@@ -8,6 +8,7 @@ from recipes.models import Recipe, RecipeData, Comment, Fav, Rate
 from recipes.forms import RecipeCreateForm, RecipeTypeCreateForm, CommentForm, RateForm
 from django.http import HttpResponse
 from django.db.models import Sum
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -48,7 +49,6 @@ class RecipeDetailView(OwnerDetailView):
     model = Recipe
     template_name = "recipes/recipe_detail.html"
     def get(self, request, pk) :
-        recipe_list = Recipe.objects.filter(owner=request.user)
         favorites = list()
         if request.user.is_authenticated:
             # rows = [{'id': 2}, {'id': 4} ... ]  (A list of rows)
@@ -65,10 +65,10 @@ class RecipeDetailView(OwnerDetailView):
             num_rates = Rate.objects.filter(recipe=recipe).count()
             average_rate_per_recipe = total_ratings / num_rates
             context = { 'recipe' : recipe, 'comments': comments, 'comment_form': comment_form, 'average_rate_per_recipe':average_rate_per_recipe,
-                        'rates':rates, 'rate_form':rate_form, 'recipe_list': recipe_list, 'favorites': favorites }
+                        'rates':rates, 'rate_form':rate_form, 'favorites': favorites }
         else:
             context = { 'recipe' : recipe, 'comments': comments, 'comment_form': comment_form,'average_rate_per_recipe':'None',
-                            'rates':rates, 'rate_form':rate_form, 'recipe_list': recipe_list, 'favorites': favorites }
+                            'rates':rates, 'rate_form':rate_form, 'favorites': favorites }
         return render(request, self.template_name, context)
 
 
