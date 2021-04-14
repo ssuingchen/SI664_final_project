@@ -1,0 +1,14 @@
+{% extends "recipes/base_menu.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+  <form action="" method="post">
+    <h3>Please enter thr recipe type</h2>
+    {% csrf_token %}
+    {{ recipeTypeCreateForm|crispy }}
+    <h3>Please enter the ingredients and recipe length</h2>
+    {% csrf_token %}
+    {{ recipeCreateForm|crispy }}
+    <input type="submit" value="Submit">
+    <input type="submit" onclick="window.location='{% url 'recipes:all' %}' ; return false;" value="Cancel">
+  </form>
+{% endblock %}

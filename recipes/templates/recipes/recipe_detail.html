@@ -1,0 +1,109 @@
+{% extends "recipes/base_menu.html" %}
+{% load humanize %} <!-- https://docs.djangoproject.com/en/3.0/ref/contrib/humanize -->
+{% block content %}
+<h1>{{ recipe.title }}</h1>
+{% if user.is_authenticated %}
+<div>
+    <div>
+        <!-- Two hrefs with two stacked icons each - one showing and one hidden -->
+        <a href="#" onclick=
+            "favPost('{% url 'recipes:recipe_unfavorite' recipe.id %}', {{ recipe.id }} );return false;"
+            {% if recipe.id not in favorites %} style="display: none;" {% endif %} style="display:inline-block;"
+            id="favorite_star_{{recipe.id}}">Add to my favorite
+        <span class="fa-stack" style="vertical-align: middle;">
+        <i class="fa fa-star fa-stack-1x" style="color: blue;"></i>
+        <i class="fa fa-star-o fa-stack-1x"></i>
+        </span>
+        </a>
+        <!-- the second href -->
+        <a href="#" onclick=
+             "favPost('{% url 'recipes:recipe_favorite' recipe.id %}', {{ recipe.id }} );return false;"
+            {% if recipe.id in favorites %} style="display: none;" {% endif %} style="display:inline-block;"
+            id="unfavorite_star_{{recipe.id}}">Add to my favorite
+        <span class="fa-stack" style="vertical-align: middle;">
+        <i class="fa fa-star fa-stack-1x" style="display: none; color: blue;"></i>
+        <i class="fa fa-star-o fa-stack-1x"></i>
+        </span>
+        </a>
+        <span style="display:flex; float:right;"><p style="font-size:15px;">Average Rating: {{average_rate_per_recipe}}</p></span>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-6">
+            <h4>Ingredients</h4>
+            <p>
+                {{ recipe.ingredients }}
+            </p>
+        </div>
+        <div class="col-sm-6">
+            <h4>Instructions</h4>
+            <p>
+                {{ recipe.generated_text }}
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if recipe.owner == user %}
+(<a href="{% url 'recipes:recipe_update' recipe.id %}">Edit</a> |
+<a href="{% url 'recipes:recipe_delete' recipe.id %}">Delete</a>)
+{% endif %}
+{% if user.is_authenticated %}
+<br clear="all"/>
+<p>
+{% load crispy_forms_tags %}
+<form method="post" action="{% url 'recipes:recipe_comment_create' recipe.id %}">
+    {% csrf_token %}
+    {{ comment_form|crispy }}
+<input type="submit" value="Submit">
+<input type="submit" value="All {{user.username}}'s Recipes" onclick="window.location.href='{% url 'recipes:user_page' %}';return false;">
+<input type="submit" value="All Recipes" onclick="window.location.href='{% url 'recipes:all' %}';return false;">
+</form>
+</p>
+<p>
+{% load crispy_forms_tags %}
+<form method="post" action="{% url 'recipes:recipe_rate_create' recipe.id %}">
+    {% csrf_token %}
+    {{ rate_form|crispy }}
+<input type="submit" value="Submit">
+<input type="submit" value="All {{user.username}}'s Recipes" onclick="window.location.href='{% url 'recipes:user_page' %}';return false;">
+<input type="submit" value="All Recipes" onclick="window.location.href='{% url 'recipes:all' %}';return false;">
+</form>
+</p>
+{% endif %}
+<h2 style="text-align:center; margin:30px;">Comments from users</h2>
+<div class="row" style="height: 50vh;">
+    {% for comment in comments %}
+    <div class="col-sm-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">by {{ comment.owner }}</div>
+            <div class="card-body">
+                <h5 class="card-title">({{ comment.updated_at|naturaltime }})</h5>
+                <p class="card-text">{{ comment.text }}</p>
+                {% if user == comment.owner %}
+                <a href="{% url 'recipes:recipe_comment_delete' comment.id %}"><i class="fa fa-trash"></i></a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+
+<script>
+function favPost(url, thing_id) {
+    console.log('Requesting JSON');
+    $.post(url, {},  function(rowz){
+        console.log(url, 'finished');
+        $("#unfavorite_star_"+thing_id).toggle();
+        $("#favorite_star_"+thing_id).toggle();
+    }).fail(function(xhr) {
+        alert('Url failed with '+xhr.status+' '+url);
+    });
+}
+</script>
+{% endblock %}
+
